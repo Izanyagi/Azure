@@ -1,46 +1,41 @@
 #variables.tf
 
-variable "lokasjon" {
-	description = "Azure regionen hvor ressursene skal opprettes"
-	type        = string
-	default     = "West Europe"
+variable "location" {
+  description = "Azure region for the VMs"
+  type        = string
 }
 
-variable "ressurs_gruppe_navn" {
-	description = "Navnet på ressursgruppa"
-	type        = string
-	#default	  = "Ressurs_Gruppe_1"
-	#Hvis default ikke er satt henter den fra terraform.tfvars
-
+variable "resource_group_name" {
+  description = "Resource group name"
+  type        = string
 }
 
-variable "vnet_navn" {
-	description = "Navnet på nettverket"
-	type        = string
-	#default	  = "Net1"
-	#Hvis default ikke er satt henter den fra terraform.tfvars
-
+variable "admin_username" {
+  description = "Admin username for VMs"
+  type        = string
 }
 
-variable "ip_range" {
-	description = "Adresseområde for Net1"
-	type        = list(string)
-	#default     = ["192.168.200.0/24"]
-	#Hvis default ikke er satt henter den fra terraform.tfvars
+variable "ssh_public_key" {
+  description = "SSH public key content"
+  type        = string
 }
 
-variable "subnet_navn" {
-	description = "Subnettnavn tilgjengelig for Net1"
-	type = list(string)
-	#default = ["Net1_1", "Net1_2"]
-	#Hvis default ikke er satt henter den fra terraform.tfvars
-
+variable "vm_size" {
+  description = "Size of the virtual machines"
+  type        = string
 }
 
-variable "subnet_ranges" {
-	description = "Subnettranges tilgjengelig for Net1"
-	type = list(string)
-	#default = ["192.168.100.0/25", "192.168.100.128/25"]
-	#Hvis default ikke er satt henter den fra terraform.tfvars
+variable "nic_ids" {
+  description = "List of NIC IDs to attach to VMs"
+  type        = list(string)
+}
 
+variable "public_ip" {
+  description = "Public IP address for the web VM"
+  type        = string
+}
+
+variable "private_ips" {
+  description = "List of private IPs for VMs"
+  type        = list(string)
 }

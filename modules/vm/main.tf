@@ -2,7 +2,7 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "=3.0.0"
+      version = ">=3.0.0"
     }
   }
 }
@@ -13,157 +13,127 @@ provider "azurerm" {
 }
 
 
-
-module "network" {
-
-
-    source             = "../network"
-    vnet_name          = "linux-vm-vnet"
-    vnet_address_space =  ["30.0.0.0/16"]
-    subnet_names       =  [ "linux-vm-subnet" ]
-    subnet_address_prefixes = ["30.0.1.0/24"]
-    location                = var.location
-    resource_group_name     = var.resource_group_name
-}
-
-
-
-
 # Linux Virtual Machine 1
+resource "azurerm_linux_virtual_machine" "sql_1" {
+  name                = "sql-1"
+  resource_group_name = var.resource_group_name
+  location            = var.location
+  size                = var.vm_size
+  admin_username      = var.admin_username
 
-resource "azurerm_linux_virtual_machine" "sql_vm_1" {
+  admin_ssh_key {
+    username   = var.admin_username
+    public_key = var.ssh_public_key
+  }
 
+  network_interface_ids = [var.nic_ids[0]]
 
-    name                = "sql-vm-1"
-    resource_group_name = var.resource_group_name
-    location            = var.location
-    size                = "Standard_B1s"
-    admin_username      = "azureuser"
+  os_disk {
+    caching              = "ReadWrite"
+    storage_account_type = "Standard_LRS"
+  }
 
-    admin_ssh_key {
-        username  = "azureuser"
-        public_key  = file("~/.ssh/id_rsa.pub") # makes sure a SSH key is generated
-    }
+  source_image_reference {
+    publisher = "Canonical"
+    offer     = "UbuntuServer"
+    sku       = "18.04-LTS"
+    version   = "latest"
+  }
 
-    network_interface_ids = [
-        module.network.nic_ids[0]
-    ]
+ custom_data = base64encode(<<-EOT
+#!/bin/bash
 
-    os_disk {
-        caching         = "ReadWrite"
-        storage_account_type = "Standard_LRS"
-    }
-
-    source_image_reference {
-        publisher = "Canonical"
-        offer     = "UbuntuServer"
-        sku       = "18.04-LTS"
-        version   = "latest"
-    }
-
-
-    custom_data = base64encode(<<-EOT
-
-        #!/bin/bash
-        sudo apt update
-        sudo apt install -y mysql-server
-        sudo systemctl enable mysql
-        sudo systemctl start mysql
-    EOT)
+sudo apt update
+sudo apt install -y mysql-server
+sudo systemctl enable mysql
+sudo systemctl restart mysql
+EOT
+  ) 
 }
 
 # Linux Virtual Machine 2
+resource "azurerm_linux_virtual_machine" "sql_2" {
+  name                = "sql-2"
+  resource_group_name = var.resource_group_name
+  location            = var.location
+  size                = var.vm_size
+  admin_username      = var.admin_username
 
- resource "azurerm_linux_virtual_machine" "sql_vm_2" {
+  admin_ssh_key {
+    username   = var.admin_username
+    public_key = var.ssh_public_key
+  }
 
+  network_interface_ids = [var.nic_ids[1]]
 
-    name                = "sql-vm-2"
-    resource_group_name = var.resource_group_name
-    location            = var.location
-    size                = "Standard_B1s"
-    admin_username      = "azureuser"
+  os_disk {
+    caching              = "ReadWrite"
+    storage_account_type = "Standard_LRS"
+  }
 
-    admin_ssh_key {
-        username  = "azureuser"
-        public_key  = file("~/.ssh/id_rsa.pub") # makes sure a SSH key is generated
-    }
+  source_image_reference {
+    publisher = "Canonical"
+    offer     = "UbuntuServer"
+    sku       = "18.04-LTS"
+    version   = "latest"
+  }
 
-    network_interface_ids = [
-        module.network.nic_ids[0]
-    ]
+ custom_data = base64encode(<<-EOT
+#!/bin/bash
 
-    os_disk {
-        caching         = "ReadWrite"
-        storage_account_type = "Standard_LRS"
-    }
+sudo apt update
+sudo apt install -y mysql-server
+sudo systemctl enable mysql
+sudo systemctl restart mysql
+EOT
+  )  
+}
 
-    source_image_reference {
-        publisher = "Canonical"
-        offer     = "UbuntuServer"
-        sku       = "18.04-LTS"
-        version   = "latest"
-    }
+# Linux Virtual Machine 3 (Web)
+resource "azurerm_linux_virtual_machine" "web_1" {
+  name                = "web-1"
+  resource_group_name = var.resource_group_name
+  location            = var.location
+  size                = var.vm_size
+  admin_username      = var.admin_username
 
+  admin_ssh_key {
+    username   = var.admin_username
+    public_key = var.ssh_public_key
+  }
 
-    custom_data = base64encode(<<-EOT
+  network_interface_ids = [var.nic_ids[2]]
 
-        #!/bin/bash
-        sudo apt update
-        sudo apt install -y mysql-server
-        sudo systemctl enable mysql
-        sudo systemctl start mysql
-    EOT)
- }
+  os_disk {
+    caching              = "ReadWrite"
+    storage_account_type = "Standard_LRS"
+  }
 
+  source_image_reference {
+    publisher = "Canonical"
+    offer     = "UbuntuServer"
+    sku       = "18.04-LTS"
+    version   = "latest"
+  }
 
-# Linux Virtual Machine 3
+ custom_data = base64encode(<<-EOT
+#!/bin/bash
+sudo apt update
+sudo apt install -y apache2
+sudo systemctl enable apache2
+sudo systemctl restart apache2
 
- resource "azurerm_linux_virtual_machine" "sql_vm_3" {
-
-
-    name                = "sql-vm-3"
-    resource_group_name = var.resource_group_name
-    location            = var.location
-    size                = "Standard_B1s"
-    admin_username      = "azureuser"
-
-    admin_ssh_key {
-        username  = "azureuser"
-        public_key  = file("~/.ssh/id_rsa.pub") # makes sure a SSH key is generated
-    }
-
-    network_interface_ids = [
-        module.network.nic_ids[0]
-    ]
-
-    os_disk {
-        caching         = "ReadWrite"
-        storage_account_type = "Standard_LRS"
-    }
-
-    source_image_reference {
-        publisher = "Canonical"
-        offer     = "UbuntuServer"
-        sku       = "18.04-LTS"
-        version   = "latest"
-    }
-
-
-    custom_data = base64encode(<<-EOT
-
-        #!/bin/bash
-        sudo apt update
-        sudo apt install -y python3
-
-    EOT)
-
-
-
- }
-
-
-
-
-
-
+cat <<EOF | sudo tee /var/www/html/index.html
+<!DOCTYPE html>
+<html>
+<head><title>Welcome</title></head>
+<body>
+<h1>Hello from Azure via Apache2!</h1>
+<p>This is a static page served using Apache2 on Ubuntu.</p>
+</body>
+</html>
+EOF
+EOT
+)
+}
 
