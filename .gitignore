@@ -38,3 +38,11 @@ terraform.rc
 
 # Ignore the lock files
 .terraform.lock.hcl
+
+# Ignore the terraform workspace files
+tfplann
+
+
+
+# Ignore the terraform workspace files
+.tfstate    
